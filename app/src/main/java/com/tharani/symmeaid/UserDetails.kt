@@ -2,7 +2,9 @@ package com.tharani.symmeaid
 
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,9 +13,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -50,6 +57,10 @@ fun UserDetails(navController: NavHostController) {
     val viewModel: UserDetailsViewModel = viewModel()
     var name by remember { mutableStateOf("") }
     var age by remember { mutableStateOf("") }
+    var gender by remember { mutableStateOf("") }
+    var expanded by remember { mutableStateOf(false) }
+
+    val genderOptions = listOf("Male", "Female")
 
     Column(
         modifier = Modifier.fillMaxSize().background(gradient),
@@ -100,25 +111,68 @@ fun UserDetails(navController: NavHostController) {
 
         Spacer(modifier = Modifier.height(20.dp))
 
+        // Dropdown for gender selection
+        Box(
+
+        ) {
+            OutlinedTextField(
+                value = gender,
+                onValueChange = { gender = it },
+                label = { Text("Gender", color = Color.White) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 32.dp),
+                textStyle = TextStyle(color = Color.White),
+                readOnly = true,
+                trailingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.ArrowDropDown,
+                        contentDescription = "Dropdown icon",
+                        tint = Color.White,
+                        modifier = Modifier.clickable { expanded = true }
+                    )
+                },
+                colors = OutlinedTextFieldDefaults.colors(
+                    cursorColor = Color.White,
+                    focusedBorderColor = Color.White,
+                    unfocusedBorderColor = Color.White,
+                )
+            )
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                genderOptions.forEach { option ->
+                    DropdownMenuItem(
+                        text = { Text(option) },
+                        onClick = {
+                            gender = option
+                            expanded = false
+                        }
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
         Button(
             onClick = {
-                Toast.makeText(
-                    navController.context,
-                    "Button Clicked!",
-                    Toast.LENGTH_SHORT
-                ).show()
-
-                viewModel.saveUserDetails(name, age) { success ->
-                    if (success) {
-                        navController.popBackStack()
-                        navController.navigate("Capture")
-                    } else {
-                        Toast.makeText(
-                            navController.context,
-                            "An error occurred while saving your details.",
-                            Toast.LENGTH_LONG
-                        ).show()
+                if (name.isNotEmpty() && age.isNotEmpty() && gender.isNotEmpty()) {
+                    viewModel.saveUserDetails(name, age, gender) { success ->
+                        if (success) {
+                            navController.popBackStack()
+                            navController.navigate("Capture")
+                        } else {
+                            Toast.makeText(
+                                navController.context,
+                                "An error occurred while saving your details.",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
                     }
+                } else {
+                    Toast.makeText(navController.context, "Please fill in all details.", Toast.LENGTH_SHORT).show()
                 }
             },
             elevation = ButtonDefaults.buttonElevation(

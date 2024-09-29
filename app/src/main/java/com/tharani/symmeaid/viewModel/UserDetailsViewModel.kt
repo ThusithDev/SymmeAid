@@ -17,23 +17,21 @@ class UserDetailsViewModel : ViewModel() {
     private val databaseReference = FirebaseDatabase.getInstance("https://symmeaid-default-rtdb.asia-southeast1.firebasedatabase.app").getReference("users")
     private val storageReference = FirebaseStorage.getInstance().reference
     // Get the current user's ID
-    private val userId: String? = FirebaseAuth.getInstance().currentUser?.uid
+    private val userId: String?
+        get() = FirebaseAuth.getInstance().currentUser?.uid
 
     private val _profileData = mutableStateOf<ProfileData?>(null)
     val profileData: State<ProfileData?> = _profileData
 
-    init {
-        fetchUserProfile()
-    }
-
     // Function to save user details to Firebase Realtime Database
-    fun saveUserDetails(name: String, age: String, onResult: (Boolean) -> Unit) {
+    fun saveUserDetails(name: String, age: String, gender: String, onResult: (Boolean) -> Unit) {
         // Ensure userId is not null
         userId?.let { id ->
             // Create a user map with the name and age
             val user = mapOf(
                 "name" to name,
-                "age" to age
+                "age" to age,
+                "gender" to gender
             )
 
             // Save the user details to the database
@@ -54,32 +52,38 @@ class UserDetailsViewModel : ViewModel() {
     }
 
     fun fetchUserProfile() {
-        userId?.let { id ->
+        val id = userId
+        if (id != null) {
             databaseReference.child(id).get()
                 .addOnSuccessListener { dataSnapshot ->
                     val name = dataSnapshot.child("name").getValue(String::class.java) ?: ""
                     val age = dataSnapshot.child("age").getValue(String::class.java) ?: ""
+                    val gender = dataSnapshot.child("gender").getValue(String::class.java) ?: ""
 
                     val imageRef = storageReference.child("profileImages/$id.jpg")
                     imageRef.downloadUrl.addOnSuccessListener { uri ->
-                        _profileData.value = ProfileData(name = name, age = age, profileImageUrl = uri.toString())
+                        _profileData.value = ProfileData(name = name, age = age, gender = gender, profileImageUrl = uri.toString())
                         Log.d("UserDetailsViewModel", "Profile data fetched successfully: $name, $age, $uri")
                     }.addOnFailureListener { e ->
-                        _profileData.value = ProfileData(name = name, age = age, profileImageUrl = null)
+                        _profileData.value = ProfileData(name = name, age = age, gender = gender, profileImageUrl = null)
                         Log.e("UserDetailsViewModel", "Error fetching profile image", e)
                     }
                 }.addOnFailureListener { e ->
                     Log.e("UserDetailsViewModel", "Error fetching user data", e)
                 }
-        } ?: run {
+        } else {
             Log.e("UserDetailsViewModel", "User ID is null")
         }
     }
 
+    fun clearProfileData() {
+        _profileData.value = null
+    }
 
     data class ProfileData(
         val name: String,
         val age: String,
+        val gender: String,
         val profileImageUrl: String?
     )
 }

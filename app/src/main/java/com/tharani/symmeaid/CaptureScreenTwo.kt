@@ -68,26 +68,8 @@ import android.graphics.Matrix
 import android.graphics.Rect
 import android.graphics.YuvImage
 
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.animation.core.*
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.graphics.drawscope.*
-
 import android.media.Image
 import android.widget.Toast
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.size
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Canvas
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
@@ -98,7 +80,7 @@ import java.io.ByteArrayOutputStream
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun CaptureScreen(navController: NavHostController, faceCaptureViewModel: FaceCaptureViewModel) {
+fun CaptureScreenTwo(navController: NavHostController, faceCaptureViewModel: FaceCaptureViewModel) {
     val context = LocalContext.current
     val cameraPermissionState = rememberPermissionState(permission = Manifest.permission.CAMERA)
     val progress = remember { mutableFloatStateOf(0f) } // Progress value
@@ -124,7 +106,7 @@ fun CaptureScreen(navController: NavHostController, faceCaptureViewModel: FaceCa
 
     if (cameraPermissionState.status.isGranted) {
         Box(modifier = Modifier.fillMaxSize()) {
-            CameraPreview(
+            CameraPreviewTwo(
                 context = context,
                 faceDetector = faceDetector,
                 navController = navController,
@@ -159,7 +141,7 @@ fun CaptureScreen(navController: NavHostController, faceCaptureViewModel: FaceCa
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Spacer(modifier = Modifier.height(25.dp))
-                
+
                 Text(
                     text = "Analyzing your parameters",
                     color = Color.White,
@@ -200,12 +182,12 @@ fun CaptureScreen(navController: NavHostController, faceCaptureViewModel: FaceCa
 }
 
 @Composable
-fun CameraPreview(
+fun CameraPreviewTwo(
     context: Context,
     faceDetector: FaceDetector,
     navController: NavController,
     faceCaptureViewModel: FaceCaptureViewModel,
-    onFaceDetected: (Float, Float, Float) -> Unit
+    onFaceDetected: (Float, Float, Float) -> Unit // Callback for passing face data
 ) {
     val lifecycleOwner = context as LifecycleOwner
     val cameraProviderFuture = remember { ProcessCameraProvider.getInstance(context) }
@@ -214,21 +196,6 @@ fun CameraPreview(
 
     AndroidView(
         factory = {
-            val viewGroup = FrameLayout(context).apply {
-                addView(previewView)
-                addView(overlayView)
-            }
-
-            previewView.parent?.let { parent ->
-                (parent as ViewGroup).removeView(previewView)
-            }
-
-            // Remove overlayView from its parent if already attached
-            overlayView.parent?.let { parent ->
-                (parent as ViewGroup).removeView(overlayView)
-            }
-
-            // Add the previewView and overlayView to a FrameLayout
             val frameLayout = FrameLayout(context).apply {
                 addView(previewView)
                 addView(overlayView)
@@ -248,11 +215,7 @@ fun CameraPreview(
                         analysisUseCase.setAnalyzer(
                             ContextCompat.getMainExecutor(context)
                         ) { imageProxy ->
-                            // Determine if the front camera is being used
-                            val isFrontCamera = CameraSelector.DEFAULT_FRONT_CAMERA == CameraSelector.DEFAULT_FRONT_CAMERA
-
-                            // Call processImageProxy with the isFrontCamera flag
-                            processImageProxy(
+                            processImageProxyTwo(
                                 faceDetector = faceDetector,
                                 imageProxy = imageProxy,
                                 overlayView = overlayView,
@@ -262,7 +225,6 @@ fun CameraPreview(
                                 cameraProvider = cameraProvider,
                                 faceCaptureViewModel = faceCaptureViewModel,
                                 onFaceDetected = onFaceDetected // Pass callback
-                                //isFrontCamera = isFrontCamera // Pass the mirroring flag
                             )
                         }
                     }
@@ -285,46 +247,6 @@ fun CameraPreview(
     )
 }
 
-@Composable
-fun FaceScanningOverlay(
-    faceCenterX: Float?,
-    faceCenterY: Float?,
-    faceRadius: Float?
-) {
-    // Only draw if face coordinates are available
-    if (faceCenterX != null && faceCenterY != null && faceRadius != null) {
-        // Animated value for the line's vertical movement
-        val lineOffsetY by rememberInfiniteTransition(label = "").animateFloat(
-            initialValue = 0f,
-            targetValue = 1f,
-            animationSpec = infiniteRepeatable(
-                animation = tween(2000, easing = LinearEasing),
-                repeatMode = RepeatMode.Reverse
-            ), label = ""
-        )
-
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            // Draw face detection circle (white)
-            drawCircle(
-                color = Color.White,
-                center = Offset(faceCenterX, faceCenterY),
-                radius = faceRadius,
-                style = Stroke(width = 4.dp.toPx())
-            )
-
-            // Draw scanning line moving up and down within the circle
-            val lineY = faceCenterY + (lineOffsetY * faceRadius * 2) - faceRadius
-            drawLine(
-                color = Color.Red,
-                start = Offset(faceCenterX - faceRadius, lineY),
-                end = Offset(faceCenterX + faceRadius, lineY),
-                strokeWidth = 4.dp.toPx(),
-                cap = StrokeCap.Round // Rounded edges for the scanning line
-            )
-        }
-    }
-}
-
 
 private var faceDetectionTriggered = false
 private var canProcessFrame = true
@@ -333,7 +255,7 @@ private const val frameProcessingInterval = 3000L // 3 seconds interval
 private val handler = Handler(Looper.getMainLooper())
 
 @androidx.annotation.OptIn(ExperimentalGetImage::class)
-private fun processImageProxy(
+private fun processImageProxyTwo(
     faceDetector: FaceDetector,
     imageProxy: ImageProxy,
     overlayView: OverlayView,
@@ -398,7 +320,7 @@ private fun processImageProxy(
                                 // Navigate to the DisplayFace screen
                                 isNavigating = true
                                 navController.popBackStack()
-                                navController.navigate("HomePage")
+                                navController.navigate("DisplayFace")
 
                                 // Reset the state for the next detection
                                 faceDetectionTriggered = false
@@ -477,3 +399,47 @@ private fun imageProxyToBitmap(mediaImage: Image, rotationDegrees: Int): Bitmap 
     return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
 }
 
+
+/**
+@Composable
+fun FaceSymmetryOverlay(
+    leftEye: PointF?,
+    rightEye: PointF?,
+    noseBase: PointF?,
+    leftMouth: PointF?,
+    rightMouth: PointF?
+) {
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        if (leftEye != null && rightEye != null && noseBase != null) {
+            // Draw a line between the eyes
+            drawLine(
+                color = Color.Green,
+                start = Offset(leftEye.x, leftEye.y),
+                end = Offset(rightEye.x, rightEye.y),
+                strokeWidth = 4f
+            )
+
+            // Draw a vertical line down the center of the face (from the nose base)
+            val midX = (leftEye.x + rightEye.x) / 2
+            drawLine(
+                color = Color.Red,
+                start = Offset(midX, 0f),
+                end = Offset(midX, size.height),
+                strokeWidth = 4f
+            )
+
+            // Optional: draw lines between other landmarks (e.g., mouth corners)
+            leftMouth?.let { left ->
+                rightMouth?.let { right ->
+                    drawLine(
+                        color = Color.Blue,
+                        start = Offset(left.x, left.y),
+                        end = Offset(right.x, right.y),
+                        strokeWidth = 4f
+                    )
+                }
+            }
+        }
+    }
+}
+**/

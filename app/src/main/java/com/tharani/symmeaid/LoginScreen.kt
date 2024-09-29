@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,9 +18,12 @@ import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,11 +36,13 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.LinearGradient
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
@@ -100,6 +106,13 @@ fun LoginScreen(navController: NavHostController) {
 
         Spacer(modifier = Modifier.height(20.dp))
 
+        var passwordVisibility by remember{ mutableStateOf(false) }
+
+        val icon = if (passwordVisibility)
+            painterResource(id = R.drawable.baseline_visibility_24)
+        else
+            painterResource(id = R.drawable.baseline_visibility_off_24)
+
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
@@ -108,13 +121,45 @@ fun LoginScreen(navController: NavHostController) {
                 .fillMaxWidth()
                 .padding(horizontal = 32.dp),
             textStyle = TextStyle(color = Color.White),
-            visualTransformation = PasswordVisualTransformation(),
+            trailingIcon = {
+                IconButton(onClick = {
+                    passwordVisibility = !passwordVisibility
+                }) {
+                    Icon(painter = icon,
+                        contentDescription = "visibility icon")
+                }
+            },
+            visualTransformation = if (passwordVisibility) VisualTransformation.None
+            else PasswordVisualTransformation(),
             colors = OutlinedTextFieldDefaults.colors(
                 cursorColor = Color.White,
                 focusedBorderColor = Color.White,
                 unfocusedBorderColor = Color.White,
             )
         )
+
+        Spacer(modifier = Modifier.height(5.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(end = 20.dp), // Make the row fill the width
+            horizontalArrangement = Arrangement.End // Align elements to the end
+        ) {
+            TextButton(
+                onClick = {
+                    // Your navigation logic
+                    navController.popBackStack()
+                    navController.navigate("ForgotPasswordScreen")
+                },
+                modifier = Modifier
+            ) {
+                Text(
+                    text = "Forgot password?",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Light,
+                    textAlign = TextAlign.End,
+                    color = Color(0xFFFFFFFF)
+                )
+            }
+        }
 
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -187,10 +232,12 @@ fun ClickableRegisterText(navController: NavHostController, onTextSelected: (Str
     }
 
     ClickableText(text = annotatedString, onClick = {
-        // Your navigation logic
+        // navigation logic
         navController.popBackStack()
         navController.navigate("RegisterScreen")
     })
 }
 
+// navController.navigate("RegisterScreen")
+// navController.navigate("UserDetails")
 

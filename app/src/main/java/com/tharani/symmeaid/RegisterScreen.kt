@@ -26,6 +26,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -51,6 +53,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
@@ -160,6 +163,13 @@ fun RegisterScreen(navController: NavHostController) {
 
         Spacer(modifier = Modifier.height(10.dp))
 
+        var passwordVisibility by remember{ mutableStateOf(false) }
+
+        val icon = if (passwordVisibility)
+            painterResource(id = R.drawable.baseline_visibility_24)
+        else
+            painterResource(id = R.drawable.baseline_visibility_off_24)
+
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
@@ -168,7 +178,16 @@ fun RegisterScreen(navController: NavHostController) {
                 .fillMaxWidth()
                 .padding(horizontal = 32.dp),
             textStyle = TextStyle(color = Color.White),
-            visualTransformation = PasswordVisualTransformation(),
+            trailingIcon = {
+                IconButton(onClick = {
+                    passwordVisibility = !passwordVisibility
+                }) {
+                    Icon(painter = icon,
+                        contentDescription = "visibility icon")
+                }
+            },
+            visualTransformation = if (passwordVisibility) VisualTransformation.None
+            else PasswordVisualTransformation(),
             colors = OutlinedTextFieldDefaults.colors(
                 cursorColor = Color.White,
                 focusedBorderColor = Color.White,

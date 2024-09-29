@@ -19,7 +19,10 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.google.firebase.FirebaseApp
 import com.tharani.symmeaid.ui.theme.SymmeAidTheme
+import com.tharani.symmeaid.viewModel.FaceCaptureViewModel
+import com.tharani.symmeaid.viewModel.RegisterViewModel
 import com.tharani.symmeaid.viewModel.UserDetailsViewModel
+import com.tharani.symmeaid.viewModel.ProgressViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,6 +37,9 @@ class MainActivity : ComponentActivity() {
                 ) {
                     val navController = rememberNavController()
                     val userDetailsViewModel: UserDetailsViewModel = viewModel()
+                    val registerViewModel: RegisterViewModel = viewModel()
+                    val faceCaptureViewModel: FaceCaptureViewModel = viewModel()
+                    val progressViewModel: ProgressViewModel = viewModel()
 
                     NavHost(navController = navController, startDestination = "Splash"){
                         composable("Splash"){
@@ -52,16 +58,25 @@ class MainActivity : ComponentActivity() {
                             RegisterScreen(navController = navController)
                         }
                         composable("HomePage"){
-                            HomePage(navController = navController)
+                            HomePage(navController = navController, progressViewModel = progressViewModel)
                         }
                         composable("UserDetails"){
                             UserDetails(navController = navController)
                         }
                         composable("Capture"){
-                            CaptureScreen(navController = navController)
+                            CaptureScreen(navController = navController, faceCaptureViewModel = faceCaptureViewModel)
+                        }
+                        composable("CaptureTwo"){
+                            CaptureScreenTwo(navController = navController, faceCaptureViewModel = faceCaptureViewModel)
+                        }
+                        composable("DisplayFace"){
+                            DisplayImagesScreen(navController = navController, faceCaptureViewModel = faceCaptureViewModel)
                         }
                         composable("Profile"){
-                            Profile(navController = navController, viewModel = userDetailsViewModel)
+                            Profile(navController = navController, viewModel = userDetailsViewModel, registerViewModel = registerViewModel)
+                        }
+                        composable("Tutorials"){
+                            Tutorials(navController = navController)
                         }
                         composable("ArticleOne"){
                             ArticleOne(navController = navController)
@@ -74,6 +89,9 @@ class MainActivity : ComponentActivity() {
                         }
                         composable("ArticleFour"){
                             ArticleFour(navController = navController)
+                        }
+                        composable("ForgotPasswordScreen"){
+                            ForgotPasswordScreen(navController = navController, registerViewModel = registerViewModel)
                         }
                     }
                 }

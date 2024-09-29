@@ -1,5 +1,9 @@
 package com.tharani.symmeaid.viewModel
 
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.Matrix
+import android.media.Image
 import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -55,4 +59,22 @@ class RegisterViewModel : ViewModel() {
                 }
             }
     }
+
+    fun logout(userDetailsViewModel: UserDetailsViewModel,onComplete: () -> Unit) {
+        auth.signOut()
+        userDetailsViewModel.clearProfileData()
+        onComplete()
+    }
+
+    fun sendPasswordResetEmail(email: String, onComplete: (Boolean, String?) -> Unit) {
+        auth.sendPasswordResetEmail(email)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    onComplete(true, "Password reset email sent.")
+                } else {
+                    onComplete(false, task.exception?.message)
+                }
+            }
+    }
+
 }

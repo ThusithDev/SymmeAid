@@ -1,5 +1,6 @@
 package com.tharani.symmeaid
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -11,14 +12,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -36,15 +41,26 @@ import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.tharani.symmeaid.viewModel.UserDetailsViewModel
 import coil.compose.rememberImagePainter
+import com.google.firebase.auth.FirebaseAuth
+import com.tharani.symmeaid.viewModel.RegisterViewModel
 
 @Composable
 fun Profile(
     navController: NavHostController,
-    viewModel: UserDetailsViewModel // Use the viewModel parameter to access the UserDetailsViewModel
+    viewModel: UserDetailsViewModel,
+    registerViewModel: RegisterViewModel
 ) {
     val profileData by viewModel.profileData
-    val userDetailsViewModel = UserDetailsViewModel()
-    userDetailsViewModel.fetchUserProfile()
+
+    LaunchedEffect(Unit) {
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        if (currentUser != null) {
+            viewModel.fetchUserProfile()
+        } else {
+            viewModel.clearProfileData()
+            Log.e("User Error", "No current user")
+        }
+    }
 
     val gradient = Brush.linearGradient(
         0.0f to Color.Black,
@@ -61,13 +77,13 @@ fun Profile(
             hasNews = false
         ),
         BottomNavigationItem(
-            title = "Capture",
+            title = "CaptureTwo",
             selectedIcon = R.drawable.capture,
             unselectedIcon = R.drawable.capture,
             hasNews = false
         ),
         BottomNavigationItem(
-            title = "Exercises",
+            title = "Tutorials",
             selectedIcon = R.drawable.book,
             unselectedIcon = R.drawable.book,
             hasNews = false
@@ -143,6 +159,36 @@ fun Profile(
                             color = Color.White,
                             fontSize = 20.sp
                         )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Text(
+                            text = "Gender: ${profile.gender}",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.White,
+                            fontSize = 20.sp
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Logout button
+                        Button(onClick = {
+                            registerViewModel.logout(viewModel) {
+                                // Navigate to the LoginScreen or perform other actions after logout
+                                navController.navigate("LoginScreen") {
+                                    popUpTo(navController.graph.startDestinationId) {
+                                        inclusive = true
+                                    }
+                                }
+                            }
+                        },
+                            shape = RoundedCornerShape(14.dp),
+                            modifier = Modifier
+                                .align(Alignment.CenterHorizontally)
+                                .padding(top = 100.dp).width(260.dp).height(55.dp)
+                        ) {
+                            Text(text = "Log out")
+                        }
                     }
                 } ?: run {
                     CircularProgressIndicator(

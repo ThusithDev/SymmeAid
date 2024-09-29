@@ -1,5 +1,6 @@
 package com.tharani.symmeaid
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -64,6 +65,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -78,9 +80,10 @@ import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.tharani.symmeaid.viewModel.HomeViewModel
+import com.tharani.symmeaid.viewModel.ProgressViewModel
 
 @Composable
-fun HomePage(navController: NavHostController) {
+fun HomePage(navController: NavHostController, progressViewModel: ProgressViewModel) {
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.animation_one_t))
     val viewModel: HomeViewModel = viewModel()
     val userProfile by viewModel.userProfile.observeAsState()
@@ -100,13 +103,13 @@ fun HomePage(navController: NavHostController) {
             hasNews = false
         ),
         BottomNavigationItem(
-            title = "Capture",
+            title = "CaptureTwo",
             selectedIcon = R.drawable.capture,
             unselectedIcon = R.drawable.capture,
             hasNews = false
         ),
         BottomNavigationItem(
-            title = "Exercises",
+            title = "Tutorials",
             selectedIcon = R.drawable.book,
             unselectedIcon = R.drawable.book,
             hasNews = false
@@ -169,6 +172,17 @@ fun HomePage(navController: NavHostController) {
                         .background(Color.White, RoundedCornerShape(20.dp))
                 ) {
                     val checkedStates = remember { mutableStateListOf<Boolean>(false, false, false, false, false, false, false) }
+                    val context = LocalContext.current
+
+                    // Load progress when the screen starts
+                    LaunchedEffect(Unit) {
+                        progressViewModel.loadProgress { savedProgress ->
+                            savedProgress?.let {
+                                checkedStates.clear()
+                                checkedStates.addAll(it)
+                            }
+                        }
+                    }
 
                     Column(
                         modifier = Modifier.padding(start = 10.dp)
@@ -189,10 +203,26 @@ fun HomePage(navController: NavHostController) {
                                     contentAlignment = Alignment.Center,
                                     modifier = Modifier
                                         .size(40.dp)
-                                        .background(if (isChecked) Color.Black else Color.Transparent)
+                                        .background(
+                                            if (isChecked) Color.Black else Color.Transparent,
+                                            shape = RoundedCornerShape(15.dp)  // Ensure rounded corners when marked
+                                        )
                                         .border(1.dp, Color.Black, RoundedCornerShape(15.dp))
                                         .clickable {
-                                            checkedStates[index] = !isChecked
+                                            if (index == 6) {
+                                                // Reset all boxes when the 7th box is clicked
+                                                for (i in checkedStates.indices) {
+                                                    checkedStates[i] = false
+                                                }
+                                            } else {
+                                                // Toggle the current box state
+                                                checkedStates[index] = !isChecked
+                                            }
+                                            progressViewModel.saveProgress(checkedStates.toList()) { success ->
+                                                if (!success) {
+                                                    Toast.makeText(context, "Failed to save progress", Toast.LENGTH_SHORT).show()
+                                                }
+                                            }
                                         }
                                 ) {
                                     Text(
@@ -224,44 +254,6 @@ fun HomePage(navController: NavHostController) {
                 ) {
 
                 }
-
-                Text(
-                    text = "Boost your results",
-                    color = Color.White,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(top = 30.dp, start = 24.dp)
-                )
-
-                RecommendedActivityCard(
-                    title = "Calming Breathing",
-                    description = "This breathing exercise will help you stay energized...",
-                    imageResId = R.drawable.calm_breathing, // Replace with your image resource
-                    onClick = { navController.navigate("ArticleOne") }
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-                RecommendedActivityCard(
-                    title = "Yoga for Inner Healing",
-                    description = "This yoga will help reduce your stress & improve fitness...",
-                    imageResId = R.drawable.yoga_image, // Replace with your image resource
-                    onClick = { navController.navigate("ArticleTwo") }
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-                RecommendedActivityCard(
-                    title = "Nature Walks",
-                    description = "This exercise will help you lower stress levels...",
-                    imageResId = R.drawable.nature, // Replace with your image resource
-                    onClick = { navController.navigate("ArticleThree") }
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-                RecommendedActivityCard(
-                    title = "Nutritional Strategies",
-                    description = "This strategies will support you natural healing...",
-                    imageResId = R.drawable.nutrition, // Replace with your image resource
-                    onClick = { navController.navigate("ArticleFour") }
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-
             }
         }
     }
@@ -332,53 +324,12 @@ data class BottomNavigationItem(
     val parameterizedRoute: String? = null
 )
 
-@Composable
-fun RecommendedActivityCard(title: String, description: String, imageResId: Int, onClick: () -> Unit) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 10.dp, start = 24.dp, end = 24.dp)
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(8.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Image(
-                painter = painterResource(id = imageResId),
-                contentDescription = null,
-                modifier = Modifier
-                    .width(60.dp)
-                    .height(66.dp)
-                    .background(
-                        color = MaterialTheme.colorScheme.surface,
-                        shape = RoundedCornerShape(10.dp)
-                    )
-            )
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = description,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.Gray
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-            }
-        }
-    }
-}
+/**
+ *              Text(
+ *                     text = "Boost your results",
+ *                     color = Color.White,
+ *                     fontSize = 18.sp,
+ *                     fontWeight = FontWeight.Bold,
+ *                     modifier = Modifier.padding(top = 30.dp, start = 24.dp)
+ *                 )
+ */

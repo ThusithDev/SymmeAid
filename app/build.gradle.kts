@@ -91,6 +91,7 @@ dependencies {
     implementation(libs.play.services.mlkit.face.detection)
     implementation(libs.coil.compose)
     implementation(libs.androidx.runtime.livedata)
+    implementation("com.google.android.gms:play-services-vision:20.1.3")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

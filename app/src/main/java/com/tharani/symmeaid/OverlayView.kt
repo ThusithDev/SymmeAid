@@ -5,23 +5,27 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.PointF
+import android.graphics.RectF
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
 import com.google.mlkit.vision.face.Face
-import com.google.mlkit.vision.face.FaceContour
 
 class OverlayView(context: Context) : View(context) {
     private val paint = Paint().apply {
-        color = Color.RED
+        color = Color.WHITE
         strokeWidth = 8f
+        style = Paint.Style.STROKE // Hollow circle
     }
 
-    var faceMeshPoints: List<PointF> = emptyList()
+    var faceCenter: PointF? = null
+    var faceRadius: Float = 0f
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        faceMeshPoints.forEach { point ->
-            canvas.drawCircle(point.x, point.y, 8f, paint)
+        faceCenter?.let { center ->
+            // Draw the circle with calculated center and radius
+            canvas.drawCircle(center.x, center.y, faceRadius, paint)
         }
     }
 }
