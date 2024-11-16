@@ -313,7 +313,7 @@ private fun processImageProxyTwo(
                         cameraProvider.unbindAll()
                         AlertDialog.Builder(context)
                             .setTitle("Face Detection")
-                            .setMessage("Your face successfully detected")
+                            .setMessage("Your face successfully detected \n Wait until upload")
                             .setPositiveButton("OK") { dialog, _ ->
                                 dialog.dismiss()
 

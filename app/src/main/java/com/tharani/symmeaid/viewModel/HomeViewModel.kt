@@ -4,8 +4,15 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.firebase.firestore.FirebaseFirestore
+import com.tharani.symmeaid.Exercise
+import com.tharani.symmeaid.R
 
 class HomeViewModel : ViewModel() {
+
+    // Holds the current exercise
+    private val _selectedExercise = MutableLiveData<Exercise>()
+    val selectedExercise: LiveData<Exercise> = _selectedExercise
+
     private val _userProfile = MutableLiveData<UserProfile?>()
     val userProfile: LiveData<UserProfile?> = _userProfile
 
@@ -13,6 +20,15 @@ class HomeViewModel : ViewModel() {
     val isLoading: LiveData<Boolean> = _isLoading
 
     private val db = FirebaseFirestore.getInstance()
+
+    // Define the list of exercises
+    val exercises = listOf(
+        Exercise("pikaso_image", "ExerciseOne"),
+        Exercise("exercise_two", "ExerciseTwo"),
+        Exercise("exercise_three", "ExerciseThree"),
+        Exercise("exercise_four", "ExerciseFour"),
+        Exercise("exercise_one", "ExerciseFive")
+    )
 
     fun loadUserProfile(userId: String) {
         _isLoading.value = true
@@ -27,6 +43,11 @@ class HomeViewModel : ViewModel() {
             .addOnFailureListener {
                 _isLoading.value = false
             }
+    }
+
+    // Function to set a new random exercise (called when "Done" is pressed)
+    fun setRandomExercise() {
+        _selectedExercise.value = exercises.random()
     }
 }
 

@@ -20,6 +20,8 @@ import androidx.navigation.navArgument
 import com.google.firebase.FirebaseApp
 import com.tharani.symmeaid.ui.theme.SymmeAidTheme
 import com.tharani.symmeaid.viewModel.FaceCaptureViewModel
+import com.tharani.symmeaid.viewModel.HomeViewModel
+import com.tharani.symmeaid.viewModel.NotificationViewModel
 import com.tharani.symmeaid.viewModel.RegisterViewModel
 import com.tharani.symmeaid.viewModel.UserDetailsViewModel
 import com.tharani.symmeaid.viewModel.ProgressViewModel
@@ -40,6 +42,8 @@ class MainActivity : ComponentActivity() {
                     val registerViewModel: RegisterViewModel = viewModel()
                     val faceCaptureViewModel: FaceCaptureViewModel = viewModel()
                     val progressViewModel: ProgressViewModel = viewModel()
+                    val notificationViewModel: NotificationViewModel = viewModel()
+                    val homeViewModel: HomeViewModel = viewModel()
 
                     NavHost(navController = navController, startDestination = "Splash"){
                         composable("Splash"){
@@ -57,8 +61,11 @@ class MainActivity : ComponentActivity() {
                         composable("RegisterScreen"){
                             RegisterScreen(navController = navController)
                         }
+                        composable("NotificationScreen"){
+                            ScheduleNotificationScreen(navController = navController, notificationViewModel = notificationViewModel)
+                        }
                         composable("HomePage"){
-                            HomePage(navController = navController, progressViewModel = progressViewModel)
+                            HomePage(navController = navController, progressViewModel = progressViewModel, homeViewModel = homeViewModel)
                         }
                         composable("UserDetails"){
                             UserDetails(navController = navController)
@@ -70,7 +77,7 @@ class MainActivity : ComponentActivity() {
                             CaptureScreenTwo(navController = navController, faceCaptureViewModel = faceCaptureViewModel)
                         }
                         composable("DisplayFace"){
-                            DisplayImagesScreen(navController = navController, faceCaptureViewModel = faceCaptureViewModel)
+                            DisplayImagesScreen(navController = navController, faceCaptureViewModel = faceCaptureViewModel, homeViewModel = homeViewModel)
                         }
                         composable("Profile"){
                             Profile(navController = navController, viewModel = userDetailsViewModel, registerViewModel = registerViewModel)
@@ -90,8 +97,26 @@ class MainActivity : ComponentActivity() {
                         composable("ArticleFour"){
                             ArticleFour(navController = navController)
                         }
+                        composable("ExerciseOne"){
+                            ExerciseOne(navController = navController)
+                        }
+                        composable("ExerciseTwo"){
+                            ExerciseTwo(navController = navController)
+                        }
+                        composable("ExerciseThree"){
+                            ExerciseThree(navController = navController)
+                        }
+                        composable("ExerciseFour"){
+                            ExerciseFour(navController = navController)
+                        }
+                        composable("ExerciseFive"){
+                            ExerciseFive(navController = navController)
+                        }
                         composable("ForgotPasswordScreen"){
                             ForgotPasswordScreen(navController = navController, registerViewModel = registerViewModel)
+                        }
+                        composable("Feedback"){
+                            FeedbackForm(navController = navController)
                         }
                     }
                 }
@@ -99,3 +124,5 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
+// C:\Users\thusi\AndroidStudioProjects\SymmeAid\app\google-services.json

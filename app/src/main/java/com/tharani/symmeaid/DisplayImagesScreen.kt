@@ -9,7 +9,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,23 +30,21 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
-import com.google.type.Date
 import com.tharani.symmeaid.viewModel.FaceCaptureViewModel
+import com.tharani.symmeaid.viewModel.HomeViewModel
 import java.net.URLDecoder
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
-import java.util.concurrent.TimeUnit
 
 @Composable
-fun DisplayImagesScreen(navController: NavHostController, faceCaptureViewModel: FaceCaptureViewModel) {
+fun DisplayImagesScreen(navController: NavHostController, faceCaptureViewModel: FaceCaptureViewModel, homeViewModel: HomeViewModel) {
     var oldestImageUrl by remember { mutableStateOf<String?>(null) }
     var mostRecentImageUrl by remember { mutableStateOf<String?>(null) }
     var statusText by remember { mutableStateOf<String>("") }
     val context = LocalContext.current
 
-    // Fetch the oldest image URL
     // Fetch the oldest image URL
     LaunchedEffect(Unit) {
         faceCaptureViewModel.getOldestImageUrl { url ->
@@ -100,6 +100,25 @@ fun DisplayImagesScreen(navController: NavHostController, faceCaptureViewModel: 
 
         Spacer(modifier = Modifier.height(32.dp))
         Text(text = statusText, color = Color.Blue, fontSize = 16.sp, fontWeight = FontWeight.Bold,)
+        Spacer(modifier = Modifier.height(10.dp))
+        // Done Button for navigate HomePage
+        Button(onClick = {
+            // Set a new random exercise when Done is pressed
+            homeViewModel.setRandomExercise()
+
+            navController.navigate("HomePage") {
+                popUpTo(navController.graph.startDestinationId) {
+                    inclusive = true
+                }
+            }
+        },
+            shape = RoundedCornerShape(14.dp),
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .padding(top = 10.dp).width(260.dp).height(45.dp)
+        ) {
+            Text(text = "Done")
+        }
     }
 }
 
@@ -142,3 +161,9 @@ private fun checkIfOlderThan30Days(imageUrl: String): Boolean {
         false
     }
 }
+
+data class Exercise(
+    val image: String, // This will hold the image filename, e.g., "exercise_one"
+    val articleRoute: String // This will hold the route to the corresponding article, e.g., "ArticleOne"
+)
+

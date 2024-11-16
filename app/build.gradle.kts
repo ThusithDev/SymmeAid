@@ -93,6 +93,10 @@ dependencies {
     implementation(libs.androidx.runtime.livedata)
     implementation("com.google.android.gms:play-services-vision:20.1.3")
 
+    implementation(libs.androidx.work)
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.notification.compat)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

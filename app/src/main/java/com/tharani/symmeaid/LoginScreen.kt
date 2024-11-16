@@ -174,7 +174,9 @@ fun LoginScreen(navController: NavHostController) {
                         if (success) {
                             val userId = FirebaseAuth.getInstance().currentUser?.uid
                             navController.popBackStack()
-                            navController.navigate("HomePage")
+                            navController.navigate("HomePage") {
+                                popUpTo("LoginScreen") { inclusive = true }  // Ensures the user can't navigate back to login
+                            }
                         } else {
                             errorMessage = message
                             Toast.makeText(context, message, Toast.LENGTH_LONG).show()

@@ -171,6 +171,24 @@ fun Profile(
 
                         Spacer(modifier = Modifier.height(16.dp))
 
+                        // Feedback button
+                        Button(onClick = {
+                            navController.navigate("Feedback") {
+                                popUpTo(navController.graph.startDestinationId) {
+                                    inclusive = true
+                                }
+                            }
+                        },
+                            shape = RoundedCornerShape(14.dp),
+                            modifier = Modifier
+                                .align(Alignment.CenterHorizontally)
+                                .padding(top = 100.dp).width(260.dp).height(55.dp)
+                        ) {
+                            Text(text = "Feedback")
+                        }
+
+                        Spacer(modifier = Modifier.height(4.dp))
+
                         // Logout button
                         Button(onClick = {
                             registerViewModel.logout(viewModel) {
@@ -185,7 +203,7 @@ fun Profile(
                             shape = RoundedCornerShape(14.dp),
                             modifier = Modifier
                                 .align(Alignment.CenterHorizontally)
-                                .padding(top = 100.dp).width(260.dp).height(55.dp)
+                                .padding(top = 10.dp).width(260.dp).height(55.dp)
                         ) {
                             Text(text = "Log out")
                         }

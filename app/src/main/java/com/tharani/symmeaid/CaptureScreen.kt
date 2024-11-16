@@ -391,14 +391,14 @@ private fun processImageProxy(
                         cameraProvider.unbindAll()
                         AlertDialog.Builder(context)
                             .setTitle("Face Detection")
-                            .setMessage("Your face successfully detected")
+                            .setMessage("Your face successfully detected \n wait until upload")
                             .setPositiveButton("OK") { dialog, _ ->
                                 dialog.dismiss()
 
                                 // Navigate to the DisplayFace screen
                                 isNavigating = true
                                 navController.popBackStack()
-                                navController.navigate("HomePage")
+                                navController.navigate("NotificationScreen")
 
                                 // Reset the state for the next detection
                                 faceDetectionTriggered = false

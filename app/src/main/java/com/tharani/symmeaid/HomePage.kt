@@ -15,45 +15,23 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBox
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.outlined.AccountBox
-import androidx.compose.material.icons.outlined.Email
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Menu
-import androidx.compose.material.icons.outlined.Notifications
-import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -64,7 +42,6 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -72,18 +49,30 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.tharani.symmeaid.viewModel.HomeViewModel
 import com.tharani.symmeaid.viewModel.ProgressViewModel
 
 @Composable
-fun HomePage(navController: NavHostController, progressViewModel: ProgressViewModel) {
+fun HomePage(navController: NavHostController, progressViewModel: ProgressViewModel, homeViewModel: HomeViewModel) {
+
+    val context = LocalContext.current
+    val selectedExercise by homeViewModel.selectedExercise.observeAsState()
+    // If no exercise has been selected yet, show a placeholder or a default image
+    val currentExercise = selectedExercise ?: Exercise("pikaso_image", "ArticleOne")
+
+    val imageMap = mapOf(
+        "exercise_one" to R.drawable.exercise_one,
+        "exercise_two" to R.drawable.exercise_two,
+        "exercise_three" to R.drawable.exercise_three,
+        "exercise_four" to R.drawable.exercise_four
+    )
+
+    val imageResId = imageMap[currentExercise.image] ?: R.drawable.pikaso_image
+
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.animation_one_t))
     val viewModel: HomeViewModel = viewModel()
     val userProfile by viewModel.userProfile.observeAsState()
@@ -237,7 +226,7 @@ fun HomePage(navController: NavHostController, progressViewModel: ProgressViewMo
                 }
 
                 Text(
-                    text = "Keep your step for today",
+                    text = "Recommended exercise for you",
                     color = Color.White,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
@@ -249,10 +238,19 @@ fun HomePage(navController: NavHostController, progressViewModel: ProgressViewMo
                         .fillMaxWidth()
                         .padding(top = 24.dp, end = 24.dp, start = 24.dp)
                         .shadow(5.dp, shape = RoundedCornerShape(25.dp))
-                        .height(150.dp)
+                        .height(250.dp)
                         .background(Color.Black, RoundedCornerShape(25.dp))
+                        .clickable {
+                            navController.navigate(currentExercise.articleRoute)
+                        }
                 ) {
-
+                    Image(
+                        painter = painterResource(id = imageResId),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(20.dp)
+                    )
                 }
             }
         }
